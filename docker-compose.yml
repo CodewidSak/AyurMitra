@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ayurmitra-postgres
+    environment:
+      POSTGRES_DB: ayurmitra
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database-schema.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ayurmitra-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ayurmitra-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ayurmitra-network
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ayurmitra-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ayurmitra
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+      SPRING_AI_OLLAMA_MODEL: mistral
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - ayurmitra-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ayurmitra-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    depends_on:
+      - backend
+    networks:
+      - ayurmitra-network
+
+volumes:
+  postgres_data:
+  ollama_data:
+
+networks:
+  ayurmitra-network:
+    driver: bridge
