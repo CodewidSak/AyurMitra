@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: ayurmitra-backend
+  
+  datasource:
+    url: jdbc:postgresql://ep-crimson-mud-amyl8pgz-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_kTYyW3a5QVUJ
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: mistral
+          temperature: 0.7
+        enabled: true
+
+server:
+  port: 8081
+
+logging:
+  level:
+    root: WARN
+    com.ayurmitra: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate: DEBUG
