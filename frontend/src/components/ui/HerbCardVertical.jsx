@@ -3,20 +3,21 @@ import { Card } from './Card'
 import Badge from './Badge'
 import Button from './Button'
 
-// Herb images mapping - Using meaningful Ayurvedic herb images
+// Herb images mapping - Using correct Wikimedia Commons images for Ayurvedic herbs
+// All images are Creative Commons licensed (CC BY-SA 4.0 or compatible)
 const HERB_IMAGES = {
-  'Ashwagandha': 'https://images.unsplash.com/photo-1628557044797-f21a177c37ec?w=400&h=500&fit=crop', // Root herbs
-  'Turmeric': 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=400&h=500&fit=crop', // Turmeric root and powder
-  'Tulsi': 'https://images.unsplash.com/photo-1598210251046-cbdf0c14f50c?w=400&h=500&fit=crop', // Basil/herb leaves
-  'Brahmi': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=500&fit=crop', // Green herbs
-  'Amalaki': 'https://images.unsplash.com/photo-1570740462429-c0f1c7ef2c8b?w=400&h=500&fit=crop', // Indian gooseberry/amla
-  'Shatavari': 'https://images.unsplash.com/photo-1587411768941-833a61568fc7?w=400&h=500&fit=crop', // Asparagus/root herbs
-  'Triphala': 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&h=500&fit=crop', // Mixed herbs/powder
-  'Guduchi': 'https://images.unsplash.com/photo-1574856344991-aaa31b6f4ce3?w=400&h=500&fit=crop', // Climbing vines/stems
-  'Neem': 'https://images.unsplash.com/photo-1598543615461-e55c9f45ca6b?w=400&h=500&fit=crop', // Neem leaves
-  'Arjuna': 'https://images.unsplash.com/photo-1586339277861-b0b07e242b40?w=400&h=500&fit=crop', // Tree bark/wood
-  'Shankhpushpi': 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400&h=500&fit=crop', // Purple flowers
-  'Manjistha': 'https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=400&h=500&fit=crop' // Root/red herbs
+  'Ashwagandha': 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Ashwagandha_Roots.jpg', // Ashwagandha roots (Withania somnifera)
+  'Turmeric': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Curcuma_longa_roots.jpg/800px-Curcuma_longa_roots.jpg', // Turmeric (Curcuma longa)
+  'Tulsi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Ocimum_tenuiflorum_001.JPG/800px-Ocimum_tenuiflorum_001.JPG', // Tulsi/Holy Basil (Ocimum tenuiflorum)
+  'Brahmi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Bacopa_monnieri.jpg/800px-Bacopa_monnieri.jpg', // Brahmi (Bacopa monnieri)
+  'Amalaki': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Phyllanthus_emblica_fruit_and_leaves.jpg/800px-Phyllanthus_emblica_fruit_and_leaves.jpg', // Amalaki/Indian Gooseberry (Emblica officinalis)
+  'Shatavari': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Asparagus_racemosus_-_Kadavoor.jpg/800px-Asparagus_racemosus_-_Kadavoor.jpg', // Shatavari (Asparagus racemosus)
+  'Triphala': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Triphala_Powder.jpg/800px-Triphala_Powder.jpg', // Triphala powder
+  'Guduchi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Tinospora_cordifolia_-_Kadavoor.jpg/800px-Tinospora_cordifolia_-_Kadavoor.jpg', // Guduchi (Tinospora cordifolia)
+  'Neem': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Azadirachta_indica_-_Neem_-_flowers.JPG/800px-Azadirachta_indica_-_Neem_-_flowers.JPG', // Neem (Azadirachta indica)
+  'Arjuna': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Terminalia_arjuna_%28Arjun_tree%29_at_Hyderabad_%2828723540000%29_%28cropped%29.jpg/800px-Terminalia_arjuna_%28Arjun_tree%29_at_Hyderabad_%2828723540000%29_%28cropped%29.jpg', // Arjuna (Terminalia arjuna)
+  'Shankhpushpi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Convolvulus_pluricaulis_-_Kadavoor.jpg/800px-Convolvulus_pluricaulis_-_Kadavoor.jpg', // Shankhpushpi (Convolvulus pluricaulis)
+  'Manjistha': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Rubia_cordifolia_-_Kadavoor.jpg/800px-Rubia_cordifolia_-_Kadavoor.jpg' // Manjistha (Rubia cordifolia)
 }
 
 export default function HerbCardVertical({ herb, compact = false }) {
