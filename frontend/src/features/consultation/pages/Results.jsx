@@ -1,66 +1,158 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../../store/authStore'
 import MainLayout from '../../../components/layout/MainLayout'
 import { Card } from '../../../components/ui/Card'
 import ProgressBar from '../../../components/ui/ProgressBar'
 import Badge from '../../../components/ui/Badge'
 import Button from '../../../components/ui/Button'
 
+// Helper function to determine dominant dosha
+const getDominantDosha = (doshaImpact) => {
+  const { vata, pitta, kapha } = doshaImpact
+  
+  if (pitta >= vata && pitta >= kapha) return 'Pitta'
+  if (vata >= kapha) return 'Vata'
+  return 'Kapha'
+}
+
+// Helper function to get dosha description
+const getDoshaDescription = (dosha) => {
+  const descriptions = {
+    Vata: 'Vata governs movement and communication in the body. When imbalanced, it manifests as anxiety, restlessness, and irregular patterns. The elevated Vata requires grounding and calming practices.',
+    Pitta: 'Pitta governs metabolism and transformation in the body. When imbalanced, it manifests as inflammation, irritability, and excess heat. The elevated Pitta requires cooling and soothing practices.',
+    Kapha: 'Kapha governs structure and stability in the body. When imbalanced, it manifests as lethargy, congestion, and heaviness. The elevated Kapha requires stimulating and energizing practices.'
+  }
+  return descriptions[dosha] || descriptions.Pitta
+}
+
+// Get dosha-specific recommendations
+const getDoshaRecommendations = (dosha) => {
+  const recommendations = {
+    Pitta: {
+      dietary: {
+        include: ['Cool, refreshing foods', 'Sweet fruits (melon, grapes)', 'Coconut water and ghee', 'Cucumber and mint'],
+        avoid: ['Spicy, sour foods', 'Fermented foods', 'Caffeine and alcohol', 'Red meat and salt']
+      },
+      lifestyle: [
+        'Maintain cool environment and avoid excess heat',
+        'Practice calming activities like swimming',
+        'Avoid competitive and stressful situations',
+        'Moon bathing and cooling pranayama (Sheetali)',
+      ],
+      herbs: [
+        'Amalaki (500mg twice daily) - Cooling and rejuvenating',
+        'Brahmi tea before bedtime - Calms mind',
+        'Neem for blood purification - Detoxifying',
+      ]
+    },
+    Vata: {
+      dietary: {
+        include: ['Warm, cooked foods', 'Sweet fruits (dates, figs)', 'Ghee and healthy fats', 'Warm milk with spices'],
+        avoid: ['Cold, raw foods', 'Dry and crunchy snacks', 'Caffeine and stimulants', 'Frozen foods']
+      },
+      lifestyle: [
+        'Establish regular sleep schedule (10 PM - 6 AM)',
+        'Practice daily meditation (15-20 minutes)',
+        'Gentle yoga or stretching in the morning',
+        'Warm oil massage (Abhyanga) before bath',
+      ],
+      herbs: [
+        'Ashwagandha (500mg twice daily) - Grounding and calming',
+        'Brahmi tea before bedtime - Nervous system support',
+        'Triphala for digestive support - Balancing',
+      ]
+    },
+    Kapha: {
+      dietary: {
+        include: ['Light, warm, spicy foods', 'Pungent vegetables (ginger, garlic)', 'Honey and warming spices', 'Bitter greens and legumes'],
+        avoid: ['Heavy, oily foods', 'Dairy products', 'Sweet and salty tastes', 'Cold beverages']
+      },
+      lifestyle: [
+        'Wake up early (before 6 AM) and exercise vigorously',
+        'Practice energizing pranayama (Kapalabhati)',
+        'Engage in active, stimulating activities',
+        'Dry brushing massage before shower',
+      ],
+      herbs: [
+        'Trikatu (500mg twice daily) - Stimulating digestion',
+        'Guggulu for metabolism - Fat reduction',
+        'Turmeric for inflammation - Energizing',
+      ]
+    }
+  }
+  return recommendations[dosha] || recommendations.Pitta
+}
+
+// Print function
+const handlePrint = () => {
+  window.print()
+}
+
 export default function Results() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('analysis')
+  const { user } = useAuthStore()
+  
+  // Get user's constitution from profile or use default
+  const userPrakriti = user?.prakriti || 'Pitta'
+  
+  // Generate meaningful data based on user's constitution
+  const getDoshaValues = (prakriti) => {
+    const values = {
+      'Vata': { vata: 75, pitta: 20, kapha: 5 },
+      'Pitta': { vata: 25, pitta: 60, kapha: 15 },
+      'Kapha': { vata: 15, pitta: 25, kapha: 60 },
+      'Vata-Pitta': { vata: 45, pitta: 45, kapha: 10 },
+      'Pitta-Kapha': { vata: 15, pitta: 45, kapha: 40 },
+      'Vata-Kapha': { vata: 45, pitta: 10, kapha: 45 },
+    }
+    return values[prakriti] || values['Pitta']
+  }
 
-  // Mock data - replace with actual data from consultation
+  const doshaValues = getDoshaValues(userPrakriti)
+  const dominantDosha = getDominantDosha(doshaValues)
+  const doshaRecs = getDoshaRecommendations(dominantDosha)
+  
   const result = {
-    bodyPart: 'Head & Mind',
+    bodyPart: 'Constitutional Analysis',
     confidence: 95,
-    condition: 'Vata Imbalance - Stress-induced Tension',
-    severity: 'Moderate',
-    doshaImpact: {
-      vata: 75,
-      pitta: 20,
-      kapha: 5,
-    },
+    condition: `${dominantDosha} Dominant Constitution`,
+    severity: 'Balanced',
+    doshaImpact: doshaValues,
     recommendations: [
       {
         category: 'Dietary',
         icon: 'restaurant',
-        items: [
-          { do: 'Warm, cooked foods', dont: 'Cold, raw foods' },
-          { do: 'Sweet fruits (dates, figs)', dont: 'Fermented foods' },
-          { do: 'Ghee and healthy fats', dont: 'Caffeine and alcohol' },
-        ]
+        items: doshaRecs.dietary.include.map((item, i) => ({
+          do: item,
+          dont: doshaRecs.dietary.avoid[i]
+        }))
       },
       {
         category: 'Lifestyle',
         icon: 'self_improvement',
-        items: [
-          'Establish regular sleep schedule (10 PM - 6 AM)',
-          'Practice daily meditation (15-20 minutes)',
-          'Gentle yoga or stretching in the morning',
-          'Warm oil massage (Abhyanga) before bath',
-        ]
+        items: doshaRecs.lifestyle
       },
       {
         category: 'Herbal Remedies',
         icon: 'eco',
-        items: [
-          'Ashwagandha (500mg twice daily)',
-          'Brahmi tea before bedtime',
-          'Triphala for digestive support',
-        ]
+        items: doshaRecs.herbs
       },
     ],
     precautions: [
-      'Avoid excessive screen time, especially before bed',
-      'Reduce multitasking and mental overload',
-      'Consult a physician if symptoms persist beyond 2 weeks',
+      `Avoid foods and activities that aggravate ${dominantDosha} dosha`,
+      'Maintain regular daily routine (Dinacharya) suitable for your constitution',
+      'Consult a qualified Ayurvedic practitioner for personalized treatment',
+      'Monitor seasonal changes and adjust lifestyle accordingly (Ritucharya)',
     ],
     followUp: {
-      timeline: '2 weeks',
+      timeline: '4 weeks',
       trackSymptoms: true,
     }
   }
+
+  const doshaDescription = getDoshaDescription(dominantDosha)
 
   const tabs = [
     { id: 'analysis', label: 'Ayurvedic Analysis', icon: 'analytics' },
@@ -103,7 +195,7 @@ export default function Results() {
             </div>
             <div>
               <p className="font-label text-xs uppercase tracking-widest text-secondary mb-2">Primary Dosha</p>
-              <p className="text-2xl font-bold text-primary">Vata</p>
+              <p className="text-2xl font-bold text-primary">{dominantDosha}</p>
             </div>
             <div>
               <p className="font-label text-xs uppercase tracking-widest text-secondary mb-2">Recommended Action</p>
@@ -149,7 +241,7 @@ export default function Results() {
                       <span className="font-label text-xs uppercase tracking-widest text-secondary">
                         Dosha Imbalance
                       </span>
-                      <h3 className="font-headline text-2xl text-primary mt-1">Vata Dominant</h3>
+                      <h3 className="font-headline text-2xl text-primary mt-1">{dominantDosha} Dominant</h3>
                     </div>
                     <span className="material-symbols-outlined text-primary text-3xl">water_drop</span>
                   </div>
@@ -162,8 +254,7 @@ export default function Results() {
 
                   <div className="mt-8 pt-6 border-t border-primary/5">
                     <p className="text-sm text-on-surface-variant leading-relaxed italic">
-                      Vata governs movement and communication in the body. When imbalanced, it manifests as anxiety, 
-                      restlessness, and irregular patterns. The elevated Vata requires grounding and calming practices.
+                      {doshaDescription}
                     </p>
                   </div>
                 </Card>
@@ -195,8 +286,15 @@ export default function Results() {
                 <Card variant="primary">
                   <h3 className="font-headline text-2xl mb-4 italic text-surface">Root Cause Analysis</h3>
                   <p className="text-surface/90 text-sm leading-relaxed">
-                    The imbalance stems from irregular routines, excessive mental activity, and insufficient grounding practices. 
-                    Vata's mobile and cold qualities have increased, requiring warm, stable, and nourishing interventions to restore balance.
+                    {dominantDosha === 'Vata' && 
+                      'The imbalance stems from irregular routines, excessive mental activity, and insufficient grounding practices. Vata\'s mobile and cold qualities have increased, requiring warm, stable, and nourishing interventions to restore balance.'
+                    }
+                    {dominantDosha === 'Pitta' && 
+                      'The imbalance stems from excessive heat, competitive stress, and inflammatory tendencies. Pitta\'s sharp and hot qualities have increased, requiring cooling, calming, and soothing interventions to restore balance.'
+                    }
+                    {dominantDosha === 'Kapha' && 
+                      'The imbalance stems from sedentary lifestyle, heavy foods, and insufficient stimulation. Kapha\'s heavy and slow qualities have increased, requiring light, warming, and energizing interventions to restore balance.'
+                    }
                   </p>
                 </Card>
               </div>
@@ -327,20 +425,35 @@ export default function Results() {
       </section>
 
       {/* Action Buttons */}
-      <section className="mt-12 flex gap-4 justify-center">
+      <section className="mt-12 flex gap-4 justify-center print:hidden">
         <Button variant="outline" onClick={() => navigate('/consultation')}>
           <span className="material-symbols-outlined">refresh</span>
           New Consultation
         </Button>
-        <Button variant="primary">
-          <span className="material-symbols-outlined">download</span>
-          Download Report
+        <Button variant="primary" onClick={handlePrint}>
+          <span className="material-symbols-outlined">print</span>
+          Print Report
         </Button>
-        <Button variant="secondary">
-          <span className="material-symbols-outlined">share</span>
-          Share with Doctor
+        <Button variant="secondary" onClick={() => navigate('/dashboard')}>
+          <span className="material-symbols-outlined">home</span>
+          Back to Dashboard
         </Button>
       </section>
+
+      {/* Print Styles */}
+      <style>{`
+        @media print {
+          .print\\:hidden {
+            display: none !important;
+          }
+          button {
+            display: none !important;
+          }
+          nav, aside, .sidebar {
+            display: none !important;
+          }
+        }
+      `}</style>
     </MainLayout>
   )
 }
